@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef} from "react";
 import AsyncStorage from '@react-native-community/async-storage'
 import {
   StyleSheet,
@@ -9,10 +9,19 @@ import {
 } from "react-native";
 
 export default function AppView() {
-  const [nome, setNome] = useState("Caio");
+  const [nome, setNome] = useState("Teste");
   const [input, setInput] = useState("");
+  const nomeInput = useRef(null);
+  useEffect(() =>{
 
-  useEffect(() =>{}, []);
+    async function getStorage() {
+      const nomeStorage = await AsyncStorage.getItem('nomes');
+      if(nomeStorage !== null) {
+        setNome(nomeStorage);
+      }
+    }
+
+  }, []);
 
   useEffect(() => {
     async function saveStorage() {
@@ -25,7 +34,15 @@ export default function AppView() {
     setNome(input);
     setInput('');
   }
+
+  function novoNome() {
+    nomeInput.current.focus();
+  }
   
+  const letrasNome = useMemo(() => {
+    return nome.length;
+  }, [nome]);
+
 
   return (
     <View style={styles.container}>
@@ -33,11 +50,17 @@ export default function AppView() {
         placeholder="Digite o seu nome"
         value={input}
         onChangeText={(texto) => setInput(texto)}
+        ref={nomeInput}
       />
       <TouchableOpacity style={styles.btn} onPress={alteraNome}>
         <Text style={styles.btnText}>Alterar nome</Text>
       </TouchableOpacity>
       <Text style={styles.texto}>{nome}</Text>
+      <Text style={styles.contador}>O nome tem {letrasNome} letras</Text>
+      
+      <TouchableOpacity style={styles.btnNovoNome} onPress={novoNome}>
+        <Text style={styles.btnText}>Adicionar Nome</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -56,5 +79,12 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: "#FFF",
+  },
+  contador: {
+    fontSize: 16,
+  },
+  btnNovoNome: {
+    backgroundColor: "#83C300",
+    alignItems: "center",
   },
 });
