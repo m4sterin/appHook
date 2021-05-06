@@ -1,90 +1,202 @@
-import React, { useState, useEffect, useMemo, useRef} from "react";
-import AsyncStorage from '@react-native-community/async-storage'
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  Image,
   TextInput,
+  TouchableHighlight,
 } from "react-native";
+import AsyncStorage from "@react-native-community/async-storage";
 
-export default function AppView() {
-  const [nome, setNome] = useState("Teste");
-  const [input, setInput] = useState("");
-  const nomeInput = useRef(null);
-  useEffect(() =>{
+export default function App() {
+  const [qtd, setQtd] = useState(0);
+  const terminarOrden = useRef(null);
 
+  useEffect(() => {
     async function getStorage() {
-      const nomeStorage = await AsyncStorage.getItem('nomes');
-      if(nomeStorage !== null) {
-        setNome(nomeStorage);
+      const productStorage = await AsyncStorage.getItem("quantities");
+
+      if (productStorage) {
+        setQtd(Number(productStorage));
       }
     }
-
+    getStorage();
   }, []);
 
   useEffect(() => {
     async function saveStorage() {
-      await AsyncStorage.setItem('nomes', nome);
+      await AsyncStorage.setItem("quantities", qtd);
     }
     saveStorage();
-  }, [nome]);
+  }, [qtd]);
 
-  function alteraNome() {
-    setNome(input);
-    setInput('');
+  function focaOrden() {
+    terminarOrden.current.focus();
   }
-
-  function novoNome() {
-    nomeInput.current.focus();
-  }
-  
-  const letrasNome = useMemo(() => {
-    return nome.length;
-  }, [nome]);
-
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Digite o seu nome"
-        value={input}
-        onChangeText={(texto) => setInput(texto)}
-        ref={nomeInput}
-      />
-      <TouchableOpacity style={styles.btn} onPress={alteraNome}>
-        <Text style={styles.btnText}>Alterar nome</Text>
-      </TouchableOpacity>
-      <Text style={styles.texto}>{nome}</Text>
-      <Text style={styles.contador}>O nome tem {letrasNome} letras</Text>
-      
-      <TouchableOpacity style={styles.btnNovoNome} onPress={novoNome}>
-        <Text style={styles.btnText}>Adicionar Nome</Text>
-      </TouchableOpacity>
+      <View style={styles.cartao}>
+        <Image
+          style={styles.imagem}
+          source={{
+            uri:
+              "https://images9.kabum.com.br/produtos/fotos/sync_mirakl/132279/Pipoqueira-Philco-Retr-PPI02-220V_1618601007_gg.jpg",
+          }}
+        />
+
+        <View style={styles.prodInfo}>
+          <Text style={{ fontWeight: "bold" }}>
+            Pipoqueira Philco Retrô PPI02 220V
+          </Text>
+          <Text>
+            Quantidade: <Text style={{ fontWeight: "bold" }}>{qtd}</Text>
+          </Text>
+
+          <View style={styles.adicionarProd}>
+            <TouchableHighlight
+              style={styles.rmvBtn}
+              onPress={() => setQtd(qtd - 1)}
+            >
+              <Text
+                style={{
+                  color: "#ffff",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                -
+              </Text>
+            </TouchableHighlight>
+
+            <TextInput
+              style={styles.entradaTexto}
+              placeholder="0"
+              value={qtd}
+              editable={false}
+            />
+
+            <TouchableHighlight
+              style={styles.addBtn}
+              onPress={() => setQtd(qtd + 1)}
+            >
+              <Text
+                style={{
+                  color: "#ffff",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                +
+              </Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.ordenBtn}>
+        <TouchableHighlight style={styles.finishiHim} onPress={focaOrden}>
+          <Text
+            style={{
+              fontSize: 12,
+              color: "#fff",
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            FINISH HIM
+          </Text>
+        </TouchableHighlight>
+
+        <TouchableHighlight style={styles.ordenBtns} ref={terminarOrden}>
+          <Text
+            style={{
+              fontSize: 12,
+              color: "#fff",
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            REALIZAR PEDIDO
+          </Text>
+        </TouchableHighlight>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginTop: 15,
-  },
-  texto: {
-    fontSize: 30,
-  },
-  btn: {
-    backgroundColor: "red",
     alignItems: "center",
+    margin: 40,
   },
-  btnText: {
-    color: "#FFF",
+  cartao: {
+    flexDirection: "row",
+    width: 270,
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 2,
   },
-  contador: {
-    fontSize: 16,
+  imagem: {
+    width: 100,
+    height: 100,
+    borderRadius: 4,
+    marginTop: 20,
   },
-  btnNovoNome: {
-    backgroundColor: "#83C300",
+  prodInfo: {
+    flexDirection: "column",
+    width: 150,
+    margin: 15,
+  },
+  adicionarProd: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 10,
+  },
+  entradaTexto: {
+    borderRadius: 4,
+    borderWidth: 1,
+    width: 60,
+    height: 30,
+    padding: 5,
+  },
+  addBtn: {
+    backgroundColor: "#F652A0",
+    width: 30,
+    marginLeft: 10,
+    borderRadius: 15,
+  },
+  rmvBtn: {
+    backgroundColor: "#5DF15D",
+    width: 30,
+    marginRight: 10,
+    borderRadius: 15,
+  },
+  finishiHim: {
+    justifyContent: "center",
+    backgroundColor: "#F652A0",
+    width: 150,
+    height: 30,
+    borderRadius: 4,
+    borderColor: "#000000",
+    borderWidth: 1,
+  },
+  ordenBtn: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: 20,
+  },
+  ordenBtns: {
+    justifyContent: "center",
+    backgroundColor: "#F652A0",
+    width: 150,
+    height: 30,
+    borderRadius: 8,
+    marginTop: 400,
     alignItems: "center",
   },
 });
